@@ -10,19 +10,24 @@ var getId = function() {
   };
 }();
 
-function setText(id, text) {
-  var elem = getId(id);
-  if (elem) {
-    elem.innerText = text;
-  }
+function setIdField(field) {
+  return function(id, text) {
+    var elem = getId(id);
+    if (elem) {
+      elem[field] = text;
+    }
+  };
 }
+var setText = setIdField('innerText');
+var setHtml = setIdField('innerHTML');
 
 var score = 0;
-// var pi = '31415926535897932';
-var index = 0;
+var digitsRight = 0;
+
+var lookahead = 15;
 
 function scoreMultiplier() {
-  return 1 + index / 4;
+  return 1 + digitsRight / 4;
 }
 
 function onKeyDown(event) {
@@ -39,21 +44,59 @@ function onKeyDown(event) {
   setText('key', key);
   if (digit >= 0) {
     setText('digit', digit);
-    if (digit == pi[index]) {
+    if (digit == piString[digitsRight]) {
       score += scoreMultiplier();
-      index = (index + 1) % pi.length;
+      digitsRight = (digitsRight + 1) % piString.length;
     }
     else {
-      index = 0;
+      digitsRight = 0;
     }
+
+    updatePi();
   }
+}
+
+function clamp(t, lo, hi) {
+  if (t > hi) {
+    return hi;
+  }
+  if (t < lo) {
+    return lo;
+  }
+  return t;
+}
+
+function clamp01(t) {
+  return clamp(t, 0, 1);
+}
+
+function lerp(t, lo, hi) {
+  return (hi - lo) * clamp01(t) + lo;
+}
+
+function updatePi() {
+  setText('next', piString[digitsRight]);
+
+  var upcomingHtml = '';
+  for (var i = 1; i < lookahead; i++) {
+    upcomingHtml += '<span style="font-size:' +
+      lerp(i/lookahead, 200, 50) +
+      '%">' + piString[digitsRight + i] + '</span>';
+  }
+  setHtml('upcoming', upcomingHtml);
+}
+
+function onInit() {
+  updatePi();
+
+  document.addEventListener('keydown', onKeyDown);
+  window.setInterval(onUpdate, 50);
 }
 
 function onUpdate() {
   setText('score', score);
-  setText('next', pi.slice(index, index + 5));
-  setText('mult', scoreMultiplier());
+  setText('combo', 'x' + digitsRight);
+  setText('mult', 'x' + scoreMultiplier());
 }
 
-document.addEventListener('keydown', onKeyDown);
-window.setInterval(onUpdate, 50);
+onInit();
