@@ -31,7 +31,12 @@ function scoreMultiplier() {
   return 1 + digitsRight * 0.1;
 }
 
+var lockTimer = 0.0;
 function onKeyDown(event) {
+  if (lockTimer > 0) {
+    return;
+  }
+
   var key = event.keyCode;
   var digit = -1;
 
@@ -42,15 +47,14 @@ function onKeyDown(event) {
     digit = key - 96;
   }
 
-  setText('key', key);
   if (digit >= 0) {
-    setText('digit', digit);
     if (digit == piString[digitsRight]) {
       score += scoreMultiplier();
       digitsRight = (digitsRight + 1) % piString.length;
     }
     else {
       digitsRight = 0;
+      lockTimer = 0.75;
     }
 
     updatePi();
@@ -80,16 +84,22 @@ function updatePi() {
   setText('next', nextDig);
 
   var upcomingHtml = '';
+  var previousHtml = '';
+  var getSpan = function(index) {
+    var size = lerp(Math.abs(index) / lookahead, 200, 50);
+    var u = digitsRight + index;
+    var vu = u >= 0 && (u <= maxVisible || u < digitsRight);
+    var pu = vu ? piString[u] : 0;
+    var au = vu ? 100 : 0;
+    return '<span style="font-size:' +
+      size + '%;opacity:' + au + '">' + pu + '</span>';
+  };
   for (var i = 1; i < lookahead; i++) {
-    var d = digitsRight + i;
-    if (d > maxVisible) {
-      break;
-    }
-    upcomingHtml += '<span style="font-size:' +
-      lerp(i/lookahead, 200, 50) +
-      '%">' + piString[d] + '</span>';
+    upcomingHtml += getSpan(i);
+    previousHtml = getSpan(-i) + previousHtml;
   }
   setHtml('upcoming', upcomingHtml);
+  setHtml('previous', previousHtml);
 }
 
 function onInit() {
@@ -117,6 +127,10 @@ function onUpdate() {
   var now = Date.now();
   time.dt = (now - time.lastFrame) / 1000;
   time.lastFrame = now;
+
+  lockTimer -= time.dt;
+
+  getId('pi').style.backgroundColor = lockTimer > 0 ? '#aaa' : '#fff';
 
   setText('score', score);
   setText('digits', digitsRight);
