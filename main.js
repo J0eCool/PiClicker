@@ -48,11 +48,13 @@ function onKeyDown(event) {
   }
 
   if (digit >= 0) {
-    if (digit == piString[digitsRight]) {
+    var correctDigit = piString[digitsRight];
+    if (digit == correctDigit) {
       score += scoreMultiplier();
       digitsRight = (digitsRight + 1) % piString.length;
     }
     else {
+      setMessage('Wrong! Correct digit was ' + correctDigit);
       digitsRight = 0;
       lockTimer = 0.75;
     }
@@ -79,6 +81,10 @@ function lerp(t, lo, hi) {
   return (hi - lo) * clamp01(t) + lo;
 }
 
+function lerpInverse(val, lo, hi) {
+  return clamp01((val - lo) / (hi - lo));
+}
+
 function updatePi() {
   var nextDig = digitsRight <= maxVisible ? piString[digitsRight] : '?';
   setText('next', nextDig);
@@ -90,7 +96,7 @@ function updatePi() {
     var u = digitsRight + index;
     var vu = u >= 0 && (u <= maxVisible || u < digitsRight);
     var pu = vu ? piString[u] : 0;
-    var au = vu ? 100 : 0;
+    var au = vu ? 1 : 0;
     return '<span style="font-size:' +
       size + '%;opacity:' + au + '">' + pu + '</span>';
   };
@@ -110,7 +116,7 @@ function onInit() {
 }
 
 function visiblePrice() {
-  return Math.pow(maxVisible - 4, 2) + 4;
+  return Math.floor(Math.pow(maxVisible - 4, 1.75)) + 4;
 }
 
 function buyVisible() {
@@ -122,15 +128,32 @@ function buyVisible() {
   }
 }
 
+function updateLock() {
+  lockTimer -= time.dt;
+
+  getId('pi').style.backgroundColor = lockTimer > 0 ? '#aaa' : '#fff';
+}
+
+var msgTimer = 0.0;
+function setMessage(msg) {
+  setText('msg', msg)
+  msgTimer = 1.4;
+}
+
+function updateMessage() {
+  msgTimer -= time.dt;
+
+  getId('msg').style.opacity = lerpInverse(msgTimer, 0, 0.35);
+}
+
 var time = { dt: 0.0, lastFrame: Date.now()}
 function onUpdate() {
   var now = Date.now();
   time.dt = (now - time.lastFrame) / 1000;
   time.lastFrame = now;
 
-  lockTimer -= time.dt;
-
-  getId('pi').style.backgroundColor = lockTimer > 0 ? '#aaa' : '#fff';
+  updateLock();
+  updateMessage();
 
   setText('score', score);
   setText('digits', digitsRight);
