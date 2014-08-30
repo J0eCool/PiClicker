@@ -1,20 +1,27 @@
 <html>
 
 <head>
+  <script type='text/javascript' id='lt_ws' src='http://localhost:63983/socket.io/lighttable/ws.js'></script>
   <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 
 <body>
-  <p>Piiiiiiiiii</p>
+  <p>Piii</p>
   <p>Score:
     <span id="score">0</span></p>
   <p>Next digits:
     <span id="next">3</span><span id="upcoming">1415</span>
   </p>
   <p>
-    Combo: <span id="combo">x1</span>
+    Digits: <span id="digits">0</span>
     (Multiplier: <span id="mult">x1.0</span>)
   </p>
+  <ul>
+    <li>Visible Digits: <span id="visibleDigits">5</span></li>
+  </ul>
+  <p><button onclick="buyVisible()" id="buyButton">Buy Visible:
+    (<span id="visiblePrice">0</span>)
+  </button></p>
 </body>
 
 <script src="pi.js"></script>

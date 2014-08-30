@@ -24,10 +24,11 @@ var setHtml = setIdField('innerHTML');
 var score = 0;
 var digitsRight = 0;
 
-var lookahead = 15;
+var lookahead = 10;
+var maxVisible = 5;
 
 function scoreMultiplier() {
-  return 1 + digitsRight / 4;
+  return 1 + digitsRight * 0.1;
 }
 
 function onKeyDown(event) {
@@ -75,13 +76,18 @@ function lerp(t, lo, hi) {
 }
 
 function updatePi() {
-  setText('next', piString[digitsRight]);
+  var nextDig = digitsRight <= maxVisible ? piString[digitsRight] : '?';
+  setText('next', nextDig);
 
   var upcomingHtml = '';
   for (var i = 1; i < lookahead; i++) {
+    var d = digitsRight + i;
+    if (d > maxVisible) {
+      break;
+    }
     upcomingHtml += '<span style="font-size:' +
       lerp(i/lookahead, 200, 50) +
-      '%">' + piString[digitsRight + i] + '</span>';
+      '%">' + piString[d] + '</span>';
   }
   setHtml('upcoming', upcomingHtml);
 }
@@ -93,10 +99,31 @@ function onInit() {
   window.setInterval(onUpdate, 50);
 }
 
+function visiblePrice() {
+  return Math.pow(maxVisible - 4, 2) + 4;
+}
+
+function buyVisible() {
+  if (score >= visiblePrice()) {
+    score -= visiblePrice();
+    maxVisible++;
+
+    updatePi();
+  }
+}
+
+var time = { dt: 0.0, lastFrame: Date.now()}
 function onUpdate() {
+  var now = Date.now();
+  time.dt = (now - time.lastFrame) / 1000;
+  time.lastFrame = now;
+
   setText('score', score);
-  setText('combo', 'x' + digitsRight);
+  setText('digits', digitsRight);
   setText('mult', 'x' + scoreMultiplier());
+
+  setText('visibleDigits', maxVisible);
+  setText('visiblePrice', visiblePrice());
 }
 
 onInit();
