@@ -1,26 +1,5 @@
 'use strict'
 
-var getId = function() {
-  var cache = {};
-  return function(id) {
-    if (!cache[id]) {
-      cache[id] = document.getElementById(id);
-    }
-    return cache[id];
-  };
-}();
-
-function setIdField(field) {
-  return function(id, text) {
-    var elem = getId(id);
-    if (elem) {
-      elem[field] = text;
-    }
-  };
-}
-var setText = setIdField('innerText');
-var setHtml = setIdField('innerHTML');
-
 var score = 0;
 var digitsRight = 0;
 
@@ -62,28 +41,6 @@ function onKeyDown(event) {
 
     updatePi();
   }
-}
-
-function clamp(t, lo, hi) {
-  if (t > hi) {
-    return hi;
-  }
-  if (t < lo) {
-    return lo;
-  }
-  return t;
-}
-
-function clamp01(t) {
-  return clamp(t, 0, 1);
-}
-
-function lerp(t, lo, hi) {
-  return (hi - lo) * clamp01(t) + lo;
-}
-
-function lerpInverse(val, lo, hi) {
-  return clamp01((val - lo) / (hi - lo));
 }
 
 function updatePi() {
@@ -167,14 +124,14 @@ function onUpdate() {
   updateLock();
   updateMessage();
 
-  setText('score', score);
-  setText('digits', digitsRight);
-  setText('mult', 'x' + scoreMultiplier());
+  setText('score', formatNumber(score));
+  setText('digits', formatNumber(digitsRight));
+  setText('mult', 'x' + formatNumber(scoreMultiplier()));
 
   setText('visibleDigits', maxVisible);
-  setText('visiblePrice', visiblePrice());
-  setText('multiDigit', '+' + multiMulti);
-  setText('multiPrice', multiPrice());
+  setText('visiblePrice', formatNumber(visiblePrice()));
+  setText('multiDigit', '+' + formatNumber(multiMulti));
+  setText('multiPrice', formatNumber(multiPrice()));
 }
 
 onInit();
