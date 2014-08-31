@@ -26,9 +26,10 @@ var digitsRight = 0;
 
 var lookahead = 10;
 var maxVisible = 5;
+var multiMulti = 0.1;
 
 function scoreMultiplier() {
-  return 1 + digitsRight * 0.1;
+  return 1 + digitsRight * multiMulti;
 }
 
 var lockTimer = 0.0;
@@ -128,6 +129,17 @@ function buyVisible() {
   }
 }
 
+function multiPrice() {
+  return Math.floor(Math.pow(multiMulti * 20, 2.5)) * 10;
+}
+
+function buyMulti() {
+  if (score >= multiPrice()) {
+    score -= multiPrice();
+    multiMulti += 0.05;
+  }
+}
+
 function updateLock() {
   lockTimer -= time.dt;
 
@@ -161,6 +173,8 @@ function onUpdate() {
 
   setText('visibleDigits', maxVisible);
   setText('visiblePrice', visiblePrice());
+  setText('multiDigit', '+' + multiMulti);
+  setText('multiPrice', multiPrice());
 }
 
 onInit();
