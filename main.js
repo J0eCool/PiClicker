@@ -91,18 +91,18 @@ function updatePi() {
 
   var upcomingHtml = '';
   var previousHtml = '';
-  var getSpan = function(index) {
+  var digitHtml = function(index) {
     var size = lerp(Math.abs(index) / lookahead, 200, 50);
-    var u = digitsRight + index;
-    var vu = u >= 0 && (u <= maxVisible || u < digitsRight);
-    var pu = vu ? piString[u] : 0;
-    var au = vu ? 1 : 0;
+    var d = digitsRight + index;
+    var isVisible = d >= 0 && (d <= maxVisible || d < digitsRight);
+    var digit = isVisible ? piString[d] : 0;
+    var alpha = isVisible ? 1 : 0;
     return '<span style="font-size:' +
-      size + '%;opacity:' + au + '">' + pu + '</span>';
+      size + '%;opacity:' + alpha + '">' + digit + '</span>';
   };
   for (var i = 1; i < lookahead; i++) {
-    upcomingHtml += getSpan(i);
-    previousHtml = getSpan(-i) + previousHtml;
+    upcomingHtml += digitHtml(i);
+    previousHtml = digitHtml(-i) + previousHtml;
   }
   setHtml('upcoming', upcomingHtml);
   setHtml('previous', previousHtml);
@@ -146,7 +146,7 @@ function updateMessage() {
   getId('msg').style.opacity = lerpInverse(msgTimer, 0, 0.35);
 }
 
-var time = { dt: 0.0, lastFrame: Date.now()}
+var time = { dt: 0.0, lastFrame: Date.now() };
 function onUpdate() {
   var now = Date.now();
   time.dt = (now - time.lastFrame) / 1000;
