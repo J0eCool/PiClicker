@@ -1,6 +1,6 @@
 - "Show me next x digits" button
 	. Flat? cost
-	. No reward for shown digits (highlight them green)
+	. Resets multiplier
 	. Upgradeable # of digits
 
 - Hire students to add value over time

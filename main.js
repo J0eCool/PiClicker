@@ -4,11 +4,58 @@ var score = 0;
 var digitsRight = 0;
 
 var lookahead = 10;
-var maxVisible = 5;
-var multiMulti = 0.1;
+var visibleLevel = 0;
+var multiLevel = 0;
+
+var autoSaveEnabled = true;
+var kSaveInterval = 30.0;
+var nextSaveTime = kSaveInterval;
+function saveGame() {
+  var saveObj =
+    { saveVersion: 1
+    , score: score
+    , visibleLevel: visibleLevel
+    , multiLevel: multiLevel
+    };
+  localStorage.piClicker = btoa(JSON.stringify(saveObj));
+
+  autoSaveEnabled = true;
+  nextSaveTime = time.elapsed + kSaveInterval;
+
+  makePopup('Game saved', 200, 400, 5);
+}
+
+function loadGame() {
+  if (localStorage.piClicker) {
+    try {
+      var saveObj = JSON.parse(atob(localStorage.piClicker));
+      score = saveObj.score;
+      visibleLevel = saveObj.visibleLevel;
+      multiLevel = saveObj.multiLevel;
+    }
+    catch (err) {
+      setMessage('Whoops! Couldn\'t load save');
+      autoSaveEnabled = false;
+    }
+  }
+}
+
+function clearSave() {
+  localStorage.removeItem('piClicker');
+
+  autoSaveEnabled = false;
+}
+
+function getDigitsVisible() {
+  return 5 + visibleLevel;
+}
+
+function getMultiplierPerDigit() {
+  return 0.1 + 0.05 * multiLevel;
+}
 
 function scoreMultiplier() {
-  return 1 + digitsRight * multiMulti;
+  return 1 + digitsRight * getMultiplierPerDigit();
 }
 
 var lockTimer = 0.0;
@@ -57,6 +104,7 @@ var makeScorePopup = function() {
 }();
 
 function updatePi() {
+  var maxVisible = getDigitsVisible();
   var nextDig = digitsRight <= maxVisible ? piString[digitsRight] : '?';
   setText('next', nextDig);
 
@@ -80,6 +128,8 @@ function updatePi() {
 }
 
 function onInit() {
+  loadGame();
+
   updatePi();
 
   document.addEventListener('keydown', onKeyDown);
@@ -87,26 +137,26 @@ function onInit() {
 }
 
 function visiblePrice() {
-  return Math.floor(Math.pow(maxVisible - 4, 1.75)) + 4;
+  return Math.floor(Math.pow(visibleLevel + 1, 1.75)) + 4;
 }
 
 function buyVisible() {
   if (score >= visiblePrice()) {
     score -= visiblePrice();
-    maxVisible++;
+    visibleLevel++;
 
     updatePi();
   }
 }
 
 function multiPrice() {
-  return Math.floor(Math.pow(multiMulti * 20, 2.5)) * 10;
+  return Math.floor(Math.pow(multiLevel + 2, 2.5)) * 10;
 }
 
 function buyMulti() {
   if (score >= multiPrice()) {
     score -= multiPrice();
-    multiMulti += 0.05;
+    multiLevel++;
   }
 }
 
@@ -199,10 +249,14 @@ function onUpdate() {
   setText('digits', formatNumber(digitsRight));
   setText('mult', 'x' + formatNumber(scoreMultiplier()));
 
-  setText('visibleDigits', maxVisible);
+  setText('visibleDigits', formatNumber(getDigitsVisible()));
   setText('visiblePrice', formatNumber(visiblePrice()));
-  setText('multiDigit', '+' + formatNumber(multiMulti));
+  setText('multiDigit', '+' + formatNumber(getMultiplierPerDigit()));
   setText('multiPrice', formatNumber(multiPrice()));
+
+  if (autoSaveEnabled && time.elapsed > nextSaveTime) {
+    saveGame();
+  }
 }
 
 onInit();
