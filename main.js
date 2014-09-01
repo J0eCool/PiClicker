@@ -30,11 +30,13 @@ function onKeyDown(event) {
   if (digit >= 0) {
     var correctDigit = piString[digitsRight];
     if (digit == correctDigit) {
-      score += scoreMultiplier();
+      var toAdd = scoreMultiplier();
+      score += toAdd;
+      makePopup('+' + formatNumber(toAdd), 300, 100);
       digitsRight = (digitsRight + 1) % piString.length;
     }
     else {
-      setMessage('Wrong! Correct digit was ' + correctDigit);
+      setMessage('Wrong! Correct digit was <b>' + correctDigit + '</b>');
       digitsRight = 0;
       lockTimer = 0.75;
     }
@@ -105,24 +107,71 @@ function updateLock() {
 
 var msgTimer = 0.0;
 function setMessage(msg) {
-  setText('msg', msg)
-  msgTimer = 1.4;
+  setHtml('msg', msg)
+  msgTimer = 2.5;
 }
 
 function updateMessage() {
   msgTimer -= time.dt;
 
-  getId('msg').style.opacity = lerpInverse(msgTimer, 0, 0.35);
+  getId('msg').style.opacity = lerpInverse(msgTimer, 0.0, 0.35);
 }
 
-var time = { dt: 0.0, lastFrame: Date.now() };
+var popupList = [];
+function rebuildPopupHtml() {
+  var popupHtml = '';
+  for (var i = 0; i < popupList.length; i++) {
+    var p = popupList[i];
+    popupHtml += '<span id="' + p.id + '" style="position:absolute;left:' +
+      p.x + 'px;top:' + p.y + 'px">' + p.html + '</span>';
+  }
+  setHtml('popups', popupHtml);
+}
+var makePopup = function() {
+  var idNum = 0;
+  return function (content, xPos, yPos) {
+    popupList.push({
+      id: "popup-" + idNum,
+      x: xPos,
+      y: yPos,
+      lifetime: 1.0,
+      html: content
+    });
+    idNum++;
+
+    rebuildPopupHtml();
+  };
+}();
+
+function updatePopups() {
+  var needsRebuild = false;
+  for (var i = popupList.length - 1; i >= 0; i--) {
+    var p = popupList[i];
+    p.y += 40 * time.dt;
+    p.lifetime -= time.dt;
+
+    var style = getId(p.id).style;
+    style.top = p.y + 'px';
+    style.opacity = lerpInverse(p.lifetime, 0.0, 0.5);
+
+    if (p.lifetime <= 0) {
+      popupList.splice(i, 1);
+      needsRebuild = true;
+    }
+  }
+  rebuildPopupHtml();
+}
+
+var time = { dt: 0.0, elapsed: 0.0, lastFrame: Date.now() };
 function onUpdate() {
   var now = Date.now();
   time.dt = (now - time.lastFrame) / 1000;
+  time.elapsed += time.dt;
   time.lastFrame = now;
 
   updateLock();
   updateMessage();
+  updatePopups();
 
   setText('score', formatNumber(score));
   setText('digits', formatNumber(digitsRight));

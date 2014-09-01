@@ -1,14 +1,16 @@
 'use strict'
 
-var getId = function() {
-  var cache = {};
-  return function(id) {
-    if (!cache[id]) {
-      cache[id] = document.getElementById(id);
-    }
-    return cache[id];
-  };
-}();
+// var getId = function() {
+//   var cache = {};
+//   return function(id) {
+//     if (!cache[id]) {
+//       cache[id] = document.getElementById(id);
+//     }
+//     return cache[id];
+//   };
+// }();
+
+function getId(id) { return document.getElementById(id); }
 
 function setIdField(field) {
   return function(id, text) {
