@@ -1,0 +1,17 @@
+- "Show me next x digits" button
+	. Flat? cost
+	. No reward for shown digits (highlight them green)
+	. Upgradeable # of digits
+
+- Hire students to add value over time
+	. Upgrade that adds % of base cps to base digit value
+
+- Refactor the dang code!
+	. Get Grunt set up to build and consolidate
+	. Modules for things
+	. Wrap upgrade boilerplate
+
+- Blind mode
+	. Get a blind multiplier, don't see any upcoming digits
+	. Purchased visible digits add to the blind multiplier
+	. Context-free mode, don't see any prevous digits either
