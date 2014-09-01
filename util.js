@@ -79,3 +79,7 @@ function lerp(t, lo, hi) {
 function lerpInverse(val, lo, hi) {
   return clamp01((val - lo) / (hi - lo));
 }
+
+function randRange(lo, hi) {
+  return lerp(Math.random(), lo, hi);
+}

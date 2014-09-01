@@ -32,7 +32,7 @@ function onKeyDown(event) {
     if (digit == correctDigit) {
       var toAdd = scoreMultiplier();
       score += toAdd;
-      makePopup('+' + formatNumber(toAdd), 300, 100);
+      makeScorePopup(toAdd);
       digitsRight = (digitsRight + 1) % piString.length;
     }
     else {
@@ -44,6 +44,17 @@ function onKeyDown(event) {
     updatePi();
   }
 }
+var makeScorePopup = function() {
+  var next = getId('next');
+
+  return function(score) {
+    var x = next.offsetLeft;
+    var y = next.offsetTop;
+    var w = next.offsetWidth;
+    var h = next.offsetHeight;
+    makePopup('+' + formatNumber(score), x + w / 2, y + h / 4, score);
+  };
+}();
 
 function updatePi() {
   var nextDig = digitsRight <= maxVisible ? piString[digitsRight] : '?';
@@ -122,19 +133,23 @@ function rebuildPopupHtml() {
   var popupHtml = '';
   for (var i = 0; i < popupList.length; i++) {
     var p = popupList[i];
-    popupHtml += '<span id="' + p.id + '" style="position:absolute;left:' +
-      p.x + 'px;top:' + p.y + 'px">' + p.html + '</span>';
+    popupHtml += '<span id="' + p.id + '" style="opacity:' + p.a +
+      ';position:absolute;left:' + p.x + 'px;top:' + p.y + 'px">' +
+      p.html + '</span>';
   }
   setHtml('popups', popupHtml);
 }
 var makePopup = function() {
   var idNum = 0;
-  return function (content, xPos, yPos) {
+  return function (content, xPos, yPos, velScale) {
     popupList.push({
       id: "popup-" + idNum,
       x: xPos,
       y: yPos,
-      lifetime: 1.0,
+      a: 1,
+      velX: randRange(-10, 10) * Math.pow(velScale, 0.65),
+      velY: randRange(-20, -15) * Math.pow(velScale, 0.5),
+      lifetime: 2.0,
       html: content
     });
     idNum++;
@@ -147,19 +162,26 @@ function updatePopups() {
   var needsRebuild = false;
   for (var i = popupList.length - 1; i >= 0; i--) {
     var p = popupList[i];
-    p.y += 40 * time.dt;
+    p.velY += 250 * time.dt;
+    p.x += p.velX * time.dt;
+    p.y += p.velY * time.dt;
     p.lifetime -= time.dt;
+    p.a = lerpInverse(p.lifetime, 0.0, 0.5);
 
     var style = getId(p.id).style;
+    style.left = p.x + 'px';
     style.top = p.y + 'px';
-    style.opacity = lerpInverse(p.lifetime, 0.0, 0.5);
+    style.opacity = p.a;
 
     if (p.lifetime <= 0) {
       popupList.splice(i, 1);
       needsRebuild = true;
     }
   }
-  rebuildPopupHtml();
+
+  if (needsRebuild) {
+    rebuildPopupHtml();
+  }
 }
 
 var time = { dt: 0.0, elapsed: 0.0, lastFrame: Date.now() };
