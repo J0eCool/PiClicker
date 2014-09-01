@@ -1,6 +1,6 @@
 'use strict'
 
-var score = 0;
+var points = 0;
 var digitsRight = 0;
 
 var lookahead = 10;
@@ -13,7 +13,7 @@ var nextSaveTime = kSaveInterval;
 function saveGame() {
   var saveObj =
     { saveVersion: 1
-    , score: score
+    , points: points
     , visibleLevel: visibleLevel
     , multiLevel: multiLevel
     };
@@ -29,7 +29,7 @@ function loadGame() {
   if (localStorage.piClicker) {
     try {
       var saveObj = JSON.parse(atob(localStorage.piClicker));
-      score = saveObj.score;
+      points = saveObj.points;
       visibleLevel = saveObj.visibleLevel;
       multiLevel = saveObj.multiLevel;
     }
@@ -78,7 +78,7 @@ function onKeyDown(event) {
     var correctDigit = piString[digitsRight];
     if (digit == correctDigit) {
       var toAdd = scoreMultiplier();
-      score += toAdd;
+      points += toAdd;
       makeScorePopup(toAdd);
       digitsRight = (digitsRight + 1) % piString.length;
     }
@@ -245,7 +245,7 @@ function onUpdate() {
   updateMessage();
   updatePopups();
 
-  setText('score', formatNumber(score));
+  setText('score', formatNumber(points));
   setText('digits', formatNumber(digitsRight));
   setText('mult', 'x' + formatNumber(scoreMultiplier()));
 

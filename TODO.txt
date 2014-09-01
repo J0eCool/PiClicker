@@ -15,3 +15,5 @@
 	. Get a blind multiplier, don't see any upcoming digits
 	. Purchased visible digits add to the blind multiplier
 	. Context-free mode, don't see any prevous digits either
+
+- Styling things, prettify it up
