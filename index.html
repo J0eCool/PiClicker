@@ -8,7 +8,7 @@
 <body>
   <div>Pi Clicker</div>
   <div>Points:
-    <span id="score">0</span>
+    <span id="points">0</span>
   </div>
   <div><span id="msg">Thing!</span></div>
   <div id="pi">
@@ -18,18 +18,8 @@
     Digits: <span id="digits">0</span>
     (Multiplier: <span id="mult">x1.0</span>)
   </div>
-  <ul id="stats">
-    <li>Visible Digits: <span id="visibleDigits">5</span></li>
-    <li>Multiplier per digit: <span id="multiDigit">+0.1</span></li>
-  </ul>
-  <ul id="store">
-    <li><button onclick="buyVisible()" id="buyButton">Buy Visible:
-      (<span id="visiblePrice">0</span>)
-    </button></li>
-    <li><button onclick="buyMulti()" id="multButton">Buy Multiplier:
-      (<span id="multiPrice">0</span>)
-    </button></li>
-  </ul>
+  <ul id="stats"></ul>
+  <ul id="store"></ul>
   <div>
     <button onclick="saveGame()">Manual Save</button>
     <button onclick="clearSave()">Clear Save (no confirmation!)</button>
@@ -39,6 +29,7 @@
 
 <script src="pi.js"></script>
 <script src="util.js"></script>
+<script src="store.js"></script>
 <script src="main.js"></script>
 
 </html>

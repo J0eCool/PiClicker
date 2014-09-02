@@ -132,32 +132,11 @@ function onInit() {
 
   updatePi();
 
+  initStoreList();
+  rebuildStoreHtml();
+
   document.addEventListener('keydown', onKeyDown);
   window.setInterval(onUpdate, 50);
-}
-
-function visiblePrice() {
-  return Math.floor(Math.pow(visibleLevel + 1, 1.75)) + 4;
-}
-
-function buyVisible() {
-  if (score >= visiblePrice()) {
-    score -= visiblePrice();
-    visibleLevel++;
-
-    updatePi();
-  }
-}
-
-function multiPrice() {
-  return Math.floor(Math.pow(multiLevel + 2, 2.5)) * 10;
-}
-
-function buyMulti() {
-  if (score >= multiPrice()) {
-    score -= multiPrice();
-    multiLevel++;
-  }
 }
 
 function updateLock() {
@@ -245,14 +224,11 @@ function onUpdate() {
   updateMessage();
   updatePopups();
 
-  setText('score', formatNumber(points));
+  setText('points', formatNumber(points));
   setText('digits', formatNumber(digitsRight));
   setText('mult', 'x' + formatNumber(scoreMultiplier()));
 
-  setText('visibleDigits', formatNumber(getDigitsVisible()));
-  setText('visiblePrice', formatNumber(visiblePrice()));
-  setText('multiDigit', '+' + formatNumber(getMultiplierPerDigit()));
-  setText('multiPrice', formatNumber(multiPrice()));
+  updateStore();
 
   if (autoSaveEnabled && time.elapsed > nextSaveTime) {
     saveGame();
