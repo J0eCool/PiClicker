@@ -12,10 +12,19 @@ function initStoreList() {
 			, statText: 'Visible Digits'
 			, statValue: getDigitsVisible
 			}
+		,	baseValue:
+			{ text: 'Base Digit Value'
+			, price: function() {
+					return Math.floor(Math.pow(this.level + 1, 2)) * 100;
+				}
+			, statText: 'Base value'
+			, statValuePrefix: '+'
+			, statValue: getBaseDigitValue
+			}
 		,	multiplier:
 			{ text: 'Buy Multiplier'
  			, price: function() {
- 					return Math.floor(Math.pow(this.level + 2, 2.5)) * 10;
+ 					return Math.floor(Math.pow(this.level + 2, 2.5)) * 100;
 	 			}
 			, statText: 'Multiplier per digit'
 			, statValuePrefix: '+x'

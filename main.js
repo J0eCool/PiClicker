@@ -64,6 +64,10 @@ function getMultiplierPerDigit() {
   return 0.1 + 0.05 * getItemLevel('multiplier');
 }
 
+function getBaseDigitValue() {
+  return 1 + getItemLevel('baseValue');
+}
+
 function scoreMultiplier() {
   return 1 + digitsRight * getMultiplierPerDigit();
 }
@@ -87,7 +91,7 @@ function onKeyDown(event) {
   if (digit >= 0) {
     var correctDigit = piString[digitsRight];
     if (digit == correctDigit) {
-      var toAdd = scoreMultiplier();
+      var toAdd = getBaseDigitValue() * scoreMultiplier();
       points += toAdd;
       makeScorePopup(toAdd);
       digitsRight = (digitsRight + 1) % piString.length;
@@ -109,7 +113,7 @@ var makeScorePopup = function() {
     var y = next.offsetTop;
     var w = next.offsetWidth;
     var h = next.offsetHeight;
-    makePopup('+' + formatNumber(score), x + w / 2, y + h / 4, score);
+    makePopup('+' + formatNumber(score), x + w / 2, y + h / 4, scoreMultiplier());
   };
 }();
 
