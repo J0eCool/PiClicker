@@ -9,7 +9,6 @@
 - Refactor the dang code!
 	. Get Grunt set up to build and consolidate
 	. Modules for things
-	. Wrap upgrade boilerplate
 
 - Blind mode
 	. Get a blind multiplier, don't see any upcoming digits

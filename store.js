@@ -1,78 +1,79 @@
 'use strict'
 
-var storeList = [];
-
+var storeObject = {};
 function initStoreList() {
-	storeList =
-		[	{ id: 'visible'
-			, text: 'Buy Visible'
-			, onClick: buyVisible
-			, price: visiblePrice
+	storeObject =
+		{	visible:
+			{ text: 'Buy Visible'
+			, onPurchase: updatePi
+			, price: function() {
+					return Math.floor(Math.pow(this.level + 1, 1.75)) + 4;
+				}
 			, statText: 'Visible Digits'
 			, statValue: getDigitsVisible
 			}
-		,	{ id: 'multi'
-			, text: 'Buy Multiplier'
-			, onClick: buyMulti
-			, price: multiPrice
+		,	multiplier:
+			{ text: 'Buy Multiplier'
+ 			, price: function() {
+ 					return Math.floor(Math.pow(this.level + 2, 2.5)) * 10;
+	 			}
 			, statText: 'Multiplier per digit'
 			, statValuePrefix: '+x'
 			, statValue: getMultiplierPerDigit
-			, wow: function () {return this;}
 			}
-		];
-}	
+		};
+}
+
+function canAfford(item) {
+	return points >= item.price();
+}
+
+function tryPurchase(item) {
+	if (canAfford(item)) {
+		points -= item.price();
+		item.level++;
+
+		if (item.onPurchase) {
+			item.onPurchase();
+		}
+	}
+}
+
+function getItemLevel(itemName) {
+	return storeObject[itemName].level;
+}
 
 function rebuildStoreHtml() {
 	var storeHtml = '';
 	var statsHtml = '';
-	for (var i = 0; i < storeList.length; i++) {
-		var item = storeList[i];
-		storeHtml += '<li><button id="' + item.id + '">' + item.text +
-			': (<span id="' + item.id + '-price"></span>)</button></li>';
-		statsHtml += '<li>' + item.statText + ': <span id="' + item.id +
+	for (var id in storeObject) {
+		var item = storeObject[id];
+		storeHtml += '<li><button id="' + id + '">' + item.text +
+			': (<span id="' + id + '-price"></span>)</button></li>';
+		statsHtml += '<li>' + item.statText + ': <span id="' + id +
 			'-stat"></span></li>';
 	}
 
 	setHtml('store', storeHtml);
 	setHtml('stats', statsHtml);
 
-	for (var i = 0; i < storeList.length; i++) {
-		var item = storeList[i];
-		getId(item.id).onclick = item.onClick;
+	for (var id in storeObject) {
+		var item = storeObject[id];
+		item.level = 0;
+
+		var elem = getId(id);
+		elem.onclick = function () {
+			tryPurchase(this.item);
+		};
+		elem.item = item;
 	}
 }
 
 function updateStore() {
-	for (var i = 0; i < storeList.length; i++) {
-		var item = storeList[i];
-		setText(item.id + '-price', formatNumber(item.price()));
+	for (var id in storeObject) {
+		var item = storeObject[id];
+		setText(id + '-price', formatNumber(item.price()));
 		var prefix = item.statValuePrefix || '';
-		setText(item.id + '-stat', prefix + formatNumber(item.statValue()));
+		setText(id + '-stat', prefix + formatNumber(item.statValue()));
 	}
 }
-
-function visiblePrice() {
-	return Math.floor(Math.pow(visibleLevel + 1, 1.75)) + 4;
-}
-
-function buyVisible() {
-	if (points >= visiblePrice()) {
-		points -= visiblePrice();
-		visibleLevel++;
-
-		updatePi();
-	}
-}
-
-function multiPrice() {
-	return Math.floor(Math.pow(multiLevel + 2, 2.5)) * 10;
-}
-
-function buyMulti() {
-	if (points >= multiPrice()) {
-		points -= multiPrice();
-		multiLevel++;
-	}
-}
-

@@ -11,11 +11,17 @@ var autoSaveEnabled = true;
 var kSaveInterval = 30.0;
 var nextSaveTime = kSaveInterval;
 function saveGame() {
+  var storeFilter = function (obj) {
+    var ret = {};
+    for (var key in obj) {
+      ret[key] = obj[key].level;
+    }
+    return ret;
+  }
   var saveObj =
     { saveVersion: 1
     , points: points
-    , visibleLevel: visibleLevel
-    , multiLevel: multiLevel
+    , storeLevels: storeFilter(storeObject)
     };
   localStorage.piClicker = btoa(JSON.stringify(saveObj));
 
@@ -30,11 +36,15 @@ function loadGame() {
     try {
       var saveObj = JSON.parse(atob(localStorage.piClicker));
       points = saveObj.points;
-      visibleLevel = saveObj.visibleLevel;
-      multiLevel = saveObj.multiLevel;
+      var keys = Object.keys(saveObj.storeLevels);
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        storeObject[key].level = saveObj.storeLevels[key];
+      }
     }
     catch (err) {
       setMessage('Whoops! Couldn\'t load save');
+      console.log(err);
       autoSaveEnabled = false;
     }
   }
@@ -47,11 +57,11 @@ function clearSave() {
 }
 
 function getDigitsVisible() {
-  return 5 + visibleLevel;
+  return 5 + getItemLevel('visible');
 }
 
 function getMultiplierPerDigit() {
-  return 0.1 + 0.05 * multiLevel;
+  return 0.1 + 0.05 * getItemLevel('multiplier');
 }
 
 function scoreMultiplier() {
@@ -128,12 +138,12 @@ function updatePi() {
 }
 
 function onInit() {
+  initStoreList();
+  rebuildStoreHtml();
+
   loadGame();
 
   updatePi();
-
-  initStoreList();
-  rebuildStoreHtml();
 
   document.addEventListener('keydown', onKeyDown);
   window.setInterval(onUpdate, 50);
