@@ -3,6 +3,8 @@
 var points = 0;
 var digitsRight = 0;
 
+var pointsPerSecond = 0;
+
 var lookahead = 10;
 var visibleLevel = 0;
 var multiLevel = 0;
@@ -148,6 +150,7 @@ function onInit() {
   loadGame();
 
   updatePi();
+  recalculatePps();
 
   document.addEventListener('keydown', onKeyDown);
   window.setInterval(onUpdate, 50);
@@ -238,9 +241,14 @@ function onUpdate() {
   updateMessage();
   updatePopups();
 
+  points += pointsPerSecond * time.dt;
+
   setText('points', formatNumber(points));
+  setText('pps', formatNumber(pointsPerSecond));
   setText('digits', formatNumber(digitsRight));
   setText('mult', 'x' + formatNumber(scoreMultiplier()));
+
+  getId('pps-container').style.display = pointsPerSecond > 0 ? '' : 'none';
 
   updateStore();
 

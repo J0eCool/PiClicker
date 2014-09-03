@@ -30,7 +30,20 @@ function initStoreList() {
 			, statValuePrefix: '+x'
 			, statValue: getMultiplierPerDigit
 			}
+		,	student:
+			{ text: 'Student'
+			, onPurchase: recalculatePps
+			, price: exponentialPrice(25)
+			, pps: 0.2
+			}
 		};
+}
+
+function exponentialPrice(basePrice, exponent) {
+	exponent = exponent || 1.07;
+	return function() {
+		return Math.floor(basePrice * Math.pow(exponent, this.level));
+	};
 }
 
 function canAfford(item) {
@@ -52,6 +65,16 @@ function getItemLevel(itemName) {
 	return storeObject[itemName].level;
 }
 
+function recalculatePps() {
+	pointsPerSecond = 0;
+	for (var id in storeObject) {
+		var item = storeObject[id];
+		if (item.pps) {
+			pointsPerSecond += item.level * item.pps;
+		}
+	}
+}
+
 function rebuildStoreHtml() {
 	var storeHtml = '';
 	var statsHtml = '';
@@ -59,8 +82,10 @@ function rebuildStoreHtml() {
 		var item = storeObject[id];
 		storeHtml += '<li><button id="' + id + '">' + item.text +
 			': (<span id="' + id + '-price"></span>)</button></li>';
-		statsHtml += '<li>' + item.statText + ': <span id="' + id +
-			'-stat"></span></li>';
+		if (item.statText) {
+			statsHtml += '<li>' + item.statText + ': <span id="' + id +
+				'-stat"></span></li>';
+		}
 	}
 
 	setHtml('store', storeHtml);
@@ -82,7 +107,10 @@ function updateStore() {
 	for (var id in storeObject) {
 		var item = storeObject[id];
 		setText(id + '-price', formatNumber(item.price()));
-		var prefix = item.statValuePrefix || '';
-		setText(id + '-stat', prefix + formatNumber(item.statValue()));
+
+		if (item.statText) {
+			var prefix = item.statValuePrefix || '';
+			setText(id + '-stat', prefix + formatNumber(item.statValue()));
+		}
 	}
 }
