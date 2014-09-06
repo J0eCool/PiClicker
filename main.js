@@ -1,7 +1,8 @@
 'use strict'
 
 var points = 0;
-var digitsRight = 0;
+var currentDigit = 0;
+var combo = 0;
 
 var pointsPerSecond = 0;
 
@@ -71,7 +72,7 @@ function getBaseDigitValue() {
 }
 
 function scoreMultiplier() {
-  return 1 + digitsRight * getMultiplierPerDigit();
+  return 1 + combo * getMultiplierPerDigit();
 }
 
 var lockTimer = 0.0;
@@ -91,16 +92,18 @@ function onKeyDown(event) {
   }
 
   if (digit >= 0) {
-    var correctDigit = piString[digitsRight];
+    var correctDigit = piString[currentDigit];
     if (digit == correctDigit) {
       var toAdd = getBaseDigitValue() * scoreMultiplier();
       points += toAdd;
       makeScorePopup(toAdd);
-      digitsRight = (digitsRight + 1) % piString.length;
+      currentDigit++;
+      combo++;
     }
     else {
+      var retDig = getId('enable-ratchet').checked ? getRatchetDigit() : 0;
+      goToDigit(retDig);
       setMessage('Wrong! Correct digit was <b>' + correctDigit + '</b>');
-      digitsRight = 0;
       lockTimer = 0.75;
     }
 
@@ -121,15 +124,15 @@ var makeScorePopup = function() {
 
 function updatePi() {
   var maxVisible = getDigitsVisible();
-  var nextDig = digitsRight <= maxVisible ? piString[digitsRight] : '?';
+  var nextDig = currentDigit <= maxVisible ? piString[currentDigit] : '?';
   setText('next', nextDig);
 
   var upcomingHtml = '';
   var previousHtml = '';
   var digitHtml = function(index) {
     var size = lerp(Math.abs(index) / lookahead, 200, 50);
-    var d = digitsRight + index;
-    var isVisible = d >= 0 && (d <= maxVisible || d < digitsRight);
+    var d = currentDigit + index;
+    var isVisible = d >= 0 && (d <= maxVisible || d < currentDigit);
     var digit = isVisible ? piString[d] : 0;
     var alpha = isVisible ? 1 : 0;
     return '<span style="font-size:' +
@@ -141,6 +144,13 @@ function updatePi() {
   }
   setHtml('upcoming', upcomingHtml);
   setHtml('previous', previousHtml);
+}
+
+function goToDigit(digit) {
+  currentDigit = digit;
+  combo = 0;
+
+  updatePi();
 }
 
 function onInit() {
@@ -245,7 +255,8 @@ function onUpdate() {
 
   setText('points', formatNumber(points));
   setText('pps', formatNumber(pointsPerSecond));
-  setText('digits', formatNumber(digitsRight));
+  setText('digits', formatNumber(currentDigit));
+  setText('combo', formatNumber(combo));
   setText('mult', 'x' + formatNumber(scoreMultiplier()));
 
   getId('pps-container').style.display = pointsPerSecond > 0 ? '' : 'none';

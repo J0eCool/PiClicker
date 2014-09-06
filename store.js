@@ -30,6 +30,18 @@ function initStoreList() {
 			, statValuePrefix: '+x'
 			, statValue: getMultiplierPerDigit
 			}
+		,	ratchet:
+			{ text: 'Failure Ratchet'
+			, price: function() {
+					return Math.floor(Math.pow(this.level + 1, 2.65)) * 1000;
+				}
+			, statText: 'Return on failure'
+			, statValue: function() {
+					var pct = 100 * getRatchetFraction();
+					var dig = getRatchetDigit();
+					return formatNumber(pct) + '% (' + formatNumber(dig) + ')';
+				}
+			}
 		,	student:
 			{ text: 'Student'
 			, onPurchase: recalculatePps
@@ -47,12 +59,17 @@ function initStoreList() {
 	}
 }
 
+function getRatchetFraction() {
+	return 1 - Math.pow(0.5, getItemLevel('ratchet'));
+}
+
+function getRatchetDigit() {
+	return Math.floor(currentDigit * getRatchetFraction());
+}
+
 function buildingStatValue() {
 	var totalPps = this.level * this.pps;
-	// console.log(this.text + ' : ' + totalPps + ' : ' + typeof(totalPps) + ' : ' + formatNumber(totalPps));
-	var str = this.level + ' (+' + formatNumber(totalPps).toString() + ' pps)';
-	// console.log(str);
-	return str;
+	return this.level + ' (+' + formatNumber(totalPps).toString() + ' pps)';
 }
 
 function exponentialPrice(basePrice, exponent) {
