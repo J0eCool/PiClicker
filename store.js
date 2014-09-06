@@ -37,6 +37,22 @@ function initStoreList() {
 			, pps: 0.2
 			}
 		};
+
+	for (var key in storeObject) {
+		var item = storeObject[key];
+		if (item.pps !== undefined) {
+			item.statText = item.text + 's';
+			item.statValue = buildingStatValue;
+		}
+	}
+}
+
+function buildingStatValue() {
+	var totalPps = this.level * this.pps;
+	// console.log(this.text + ' : ' + totalPps + ' : ' + typeof(totalPps) + ' : ' + formatNumber(totalPps));
+	var str = this.level + ' (+' + formatNumber(totalPps).toString() + ' pps)';
+	// console.log(str);
+	return str;
 }
 
 function exponentialPrice(basePrice, exponent) {
@@ -110,7 +126,11 @@ function updateStore() {
 
 		if (item.statText) {
 			var prefix = item.statValuePrefix || '';
-			setText(id + '-stat', prefix + formatNumber(item.statValue()));
+			var value = item.statValue();
+			if (typeof(value) === 'number') {
+				value = formatNumber(value);
+			}
+			setText(id + '-stat', prefix + value);
 		}
 	}
 }
