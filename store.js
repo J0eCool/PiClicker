@@ -72,6 +72,10 @@ function buildingStatValue() {
 	return this.level + ' (+' + formatNumber(totalPps).toString() + ' pps)';
 }
 
+function blindModeMultiplier() {
+	return 1.5 + getItemLevel('visible') * 0.01;
+}
+
 function exponentialPrice(basePrice, exponent) {
 	exponent = exponent || 1.07;
 	return function() {

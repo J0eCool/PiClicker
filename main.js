@@ -10,6 +10,8 @@ var lookahead = 10;
 var visibleLevel = 0;
 var multiLevel = 0;
 
+var blindMode = false;
+
 var autoSaveEnabled = true;
 var kSaveInterval = 30.0;
 var nextSaveTime = kSaveInterval;
@@ -72,7 +74,11 @@ function getBaseDigitValue() {
 }
 
 function scoreMultiplier() {
-  return 1 + combo * getMultiplierPerDigit();
+  var mult = 1 + combo * getMultiplierPerDigit();
+  if (blindMode) {
+    mult *= blindModeMultiplier();
+  }
+  return mult;
 }
 
 var lockTimer = 0.0;
@@ -125,16 +131,20 @@ var makeScorePopup = function() {
 function updatePi() {
   var maxVisible = getDigitsVisible();
   var nextDig = currentDigit <= maxVisible ? piString[currentDigit] : '?';
-  setText('next', nextDig);
+  // setText('next', nextDig);
 
   var upcomingHtml = '';
   var previousHtml = '';
   var digitHtml = function(index) {
-    var size = lerp(Math.abs(index) / lookahead, 200, 50);
+    var size = lerp(Math.abs(index) / lookahead, 225, 50);
     var d = currentDigit + index;
     var isVisible = d >= 0 && (d <= maxVisible || d < currentDigit);
-    var digit = isVisible ? piString[d] : 0;
-    var alpha = isVisible ? 1 : 0;
+    var digit = '?';
+    if (isVisible &&
+        !(blindMode && d >= currentDigit)) {
+      digit = piString[d];
+    }
+    var alpha = isVisible || index === 0 ? 1 : 0;
     return '<span style="font-size:' +
       size + '%;opacity:' + alpha + '">' + digit + '</span>';
   };
@@ -142,6 +152,7 @@ function updatePi() {
     upcomingHtml += digitHtml(i);
     previousHtml = digitHtml(-i) + previousHtml;
   }
+  setHtml('next', digitHtml(0));
   setHtml('upcoming', upcomingHtml);
   setHtml('previous', previousHtml);
 }
@@ -149,6 +160,15 @@ function updatePi() {
 function goToDigit(digit) {
   currentDigit = digit;
   combo = 0;
+
+  updatePi();
+}
+
+function toggleBlindMode() {
+  if (!blindMode) {
+    goToDigit(0);
+  }
+  blindMode = !blindMode;
 
   updatePi();
 }
