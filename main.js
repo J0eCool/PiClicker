@@ -135,28 +135,34 @@ var makeScorePopup = function() {
 function updatePi() {
   var maxVisible = getDigitsVisible();
   var nextDig = currentDigit <= maxVisible ? piString[currentDigit] : '?';
-  // setText('next', nextDig);
 
-  var upcomingHtml = '';
-  var previousHtml = '';
   var digitHtml = function(index) {
-    var size = lerp(Math.abs(index) / lookahead, 225, 50);
+    var t = Math.pow(Math.abs(index) / lookahead, 0.65);
+    var size = lerp(t, 225, 50);
+
     var d = currentDigit + index;
-    var isVisible = d >= 0 &&
+    var isVisible = (index === 0) || (d >= 0 &&
       (d <= maxVisible || d < currentDigit) &&
-      (!noContextMode || index === 0);
+      !noContextMode);
+    var isRevealed = !noContextMode &&
+        !(blindMode && d >= currentDigit) &&
+        (d <= maxVisible || d < currentDigit);
+
+    var alpha = isVisible ? 1 : 0;
     var digit = '?';
     if (!isVisible) {
       digit = '0';
     }
-    else if (!noContextMode &&
-        !(blindMode && d >= currentDigit)) {
+    else if (isRevealed) {
       digit = piString[d];
     }
-    var alpha = isVisible || index === 0 ? 1 : 0;
+
     return '<span style="font-size:' +
       size + '%;opacity:' + alpha + '">' + digit + '</span>';
   };
+
+  var upcomingHtml = '';
+  var previousHtml = '';
   for (var i = 1; i < lookahead; i++) {
     upcomingHtml += digitHtml(i);
     previousHtml = digitHtml(-i) + previousHtml;
