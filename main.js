@@ -11,6 +11,7 @@ var visibleLevel = 0;
 var multiLevel = 0;
 
 var blindMode = false;
+var noContextMode = false;
 
 var autoSaveEnabled = true;
 var kSaveInterval = 30.0;
@@ -78,6 +79,9 @@ function scoreMultiplier() {
   if (blindMode) {
     mult *= blindModeMultiplier();
   }
+  if (noContextMode) {
+    mult *= noContextModeMultiplier();
+  }
   return mult;
 }
 
@@ -107,7 +111,7 @@ function onKeyDown(event) {
       combo++;
     }
     else {
-      var retDig = getId('enable-ratchet').checked ? getRatchetDigit() : 0;
+      var retDig = !noContextMode && getId('enable-ratchet').checked ? getRatchetDigit() : 0;
       goToDigit(retDig);
       setMessage('Wrong! Correct digit was <b>' + correctDigit + '</b>');
       lockTimer = 0.75;
@@ -138,9 +142,14 @@ function updatePi() {
   var digitHtml = function(index) {
     var size = lerp(Math.abs(index) / lookahead, 225, 50);
     var d = currentDigit + index;
-    var isVisible = d >= 0 && (d <= maxVisible || d < currentDigit);
+    var isVisible = d >= 0 &&
+      (d <= maxVisible || d < currentDigit) &&
+      (!noContextMode || index === 0);
     var digit = '?';
-    if (isVisible &&
+    if (!isVisible) {
+      digit = '0';
+    }
+    else if (!noContextMode &&
         !(blindMode && d >= currentDigit)) {
       digit = piString[d];
     }
@@ -166,9 +175,17 @@ function goToDigit(digit) {
 
 function toggleBlindMode() {
   if (!blindMode) {
+    blindMode = true;
     goToDigit(0);
   }
-  blindMode = !blindMode;
+  else if (!noContextMode) {
+    noContextMode = true;
+    goToDigit(0);
+  }
+  else {
+    noContextMode = false;
+    blindMode = false;
+  }
 
   updatePi();
 }
@@ -275,11 +292,23 @@ function onUpdate() {
 
   setText('points', formatNumber(points));
   setText('pps', formatNumber(pointsPerSecond));
-  setText('digits', formatNumber(currentDigit));
-  setText('combo', formatNumber(combo));
-  setText('mult', 'x' + formatNumber(scoreMultiplier()));
+  setText('digits', noContextMode && (currentDigit > 0) ? '?' : formatNumber(currentDigit));
+  setText('combo', noContextMode ? '?' : formatNumber(combo));
+  setText('mult', noContextMode ? '?' : 'x' + formatNumber(scoreMultiplier()));
 
   getId('pps-container').style.display = pointsPerSecond > 0 ? '' : 'none';
+
+  var blindText;
+  if (noContextMode) {
+    blindText = 'Return to Normal Mode';
+  }
+  else if (blindMode) {
+    blindText = 'Enable No-Context Mode';
+  }
+  else {
+    blindText = 'Enable Blind Mode';
+  }
+  setText('blind-button', blindText);
 
   updateStore();
 

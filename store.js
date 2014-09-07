@@ -37,9 +37,9 @@ function initStoreList() {
 				}
 			, statText: 'Return on failure'
 			, statValue: function() {
-					var pct = 100 * getRatchetFraction();
-					var dig = getRatchetDigit();
-					return formatNumber(pct) + '% (' + formatNumber(dig) + ')';
+					var pct = formatNumber(100 * getRatchetFraction());
+					var dig = noContextMode ? '0' : formatNumber(getRatchetDigit());
+					return pct + '% (' + dig + ')';
 				}
 			}
 		,	student:
@@ -74,6 +74,10 @@ function buildingStatValue() {
 
 function blindModeMultiplier() {
 	return 1.5 + getItemLevel('visible') * 0.01;
+}
+
+function noContextModeMultiplier() {
+	return 1.5;
 }
 
 function exponentialPrice(basePrice, exponent) {
