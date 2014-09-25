@@ -54,6 +54,7 @@ function loadGame() {
       autoSaveEnabled = false;
     }
   }
+  rebuildStoreHtml();
 }
 
 function clearSave() {
@@ -179,12 +180,20 @@ function goToDigit(digit) {
   updatePi();
 }
 
+function blindUnlocked() {
+  return getItemLevel('blind') > 0;
+}
+
+function noContextUnlocked() {
+  return getItemLevel('noContext') > 0;
+}
+
 function toggleBlindMode() {
   if (!blindMode) {
     blindMode = true;
     goToDigit(0);
   }
-  else if (!noContextMode) {
+  else if (!noContextMode && noContextUnlocked()) {
     noContextMode = true;
     goToDigit(0);
   }
@@ -304,8 +313,9 @@ function onUpdate() {
 
   getId('pps-container').style.display = pointsPerSecond > 0 ? '' : 'none';
 
+  getId('blind-button').style.display = blindUnlocked() ? '' : 'none';
   var blindText;
-  if (noContextMode) {
+  if (noContextMode || (blindMode && !noContextUnlocked())) {
     blindText = 'Return to Normal Mode';
   }
   else if (blindMode) {

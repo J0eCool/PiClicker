@@ -42,6 +42,17 @@ function initStoreList() {
 					return pct + '% (' + dig + ')';
 				}
 			}
+		,	blind:
+			{ text: 'Blind Mode'
+			, price: function() { return 5000; }
+			, singlePurchase: true
+			}
+		,	noContext:
+			{ text: 'No-Context Mode'
+			, price: function() { return 25000; }
+			, prereq: 'blind'
+			, singlePurchase: true
+			}
 		,	student:
 			{ text: 'Student'
 			, onPurchase: recalculatePps
@@ -99,7 +110,21 @@ function tryPurchase(item) {
 		if (item.onPurchase) {
 			item.onPurchase();
 		}
+
+		if (item.singlePurchase || isPrereq(item)) {
+			rebuildStoreHtml();
+		}
 	}
+}
+
+function isPrereq(item) {
+	for (var id in storeObject) {
+		var i = storeObject[id];
+		if (storeObject[i.prereq] === item) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function getItemLevel(itemName) {
@@ -116,16 +141,26 @@ function recalculatePps() {
 	}
 }
 
+function canShow(item) {
+	return (!item.singlePurchase || !item.level) &&
+		(!item.prereq || getItemLevel(item.prereq));
+}
+
 function rebuildStoreHtml() {
 	var storeHtml = '';
 	var statsHtml = '';
 	for (var id in storeObject) {
 		var item = storeObject[id];
-		storeHtml += '<li><button id="' + id + '">' + item.text +
-			': (<span id="' + id + '-price"></span>)</button></li>';
-		if (item.statText) {
-			statsHtml += '<li>' + item.statText + ': <span id="' + id +
-				'-stat"></span></li>';
+		if (item.level === undefined) {
+			item.level = 0;
+		}
+		if (canShow(item)) {
+			storeHtml += '<li><button id="' + id + '">' + item.text +
+				': (<span id="' + id + '-price"></span>)</button></li>';
+			if (item.statText) {
+				statsHtml += '<li>' + item.statText + ': <span id="' + id +
+					'-stat"></span></li>';
+			}
 		}
 	}
 
@@ -134,13 +169,14 @@ function rebuildStoreHtml() {
 
 	for (var id in storeObject) {
 		var item = storeObject[id];
-		item.level = 0;
 
 		var elem = getId(id);
-		elem.onclick = function () {
-			tryPurchase(this.item);
-		};
-		elem.item = item;
+		if (elem) {
+			elem.onclick = function () {
+				tryPurchase(this.item);
+			};
+			elem.item = item;
+		}
 	}
 }
 
