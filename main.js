@@ -26,6 +26,7 @@ function saveGame() {
   }
   var saveObj =
     { saveVersion: 1
+    , saveTime: time.lastFrame
     , points: points
     , storeLevels: storeFilter(storeObject)
     };
@@ -42,6 +43,7 @@ function loadGame() {
     try {
       var saveObj = JSON.parse(atob(localStorage.piClicker));
       points = saveObj.points;
+      time.lastFrame = saveObj.saveTime;
       var keys = Object.keys(saveObj.storeLevels);
       for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
